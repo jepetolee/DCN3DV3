@@ -1,0 +1,4 @@
+# ninja log v5
+0	8170	7155778547727668	G:/InternImage/segmentation/ops_dcnv3/build/temp.win-amd64-3.10/Release/InternImage/segmentation/ops_dcnv3/src/cpu/dcnv3_cpu.obj	ce75acb969d254b3
+5	19523	7155778661207642	G:/InternImage/segmentation/ops_dcnv3/build/temp.win-amd64-3.10/Release/InternImage/segmentation/ops_dcnv3/src/vision.obj	f91a7bfa70dab821
+10	62009	7155779085543814	G:/InternImage/segmentation/ops_dcnv3/build/temp.win-amd64-3.10/Release/InternImage/segmentation/ops_dcnv3/src/cuda/dcnv3_cuda.obj	2873d85d1b4b1f3e
