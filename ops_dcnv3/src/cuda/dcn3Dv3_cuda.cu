@@ -9,7 +9,7 @@
 **************************************************************************************************
 */
 
-#include "cuda/dcn2Dv3_im2col_cuda.cuh"
+#include "cuda/dcn3Dv3_im2col_cuda.cuh"
 #include <vector>
 
 #include <ATen/ATen.h>
@@ -18,7 +18,7 @@
 #include <cuda_runtime.h>
 #include <torch/torch.h>
 
-at::Tensor dcn2Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offset,
+at::Tensor dcn3Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offset,
                               const at::Tensor &mask, const int kernel_h,
                               const int kernel_w, const int stride_h,
                               const int stride_w, const int pad_h,
@@ -68,7 +68,7 @@ at::Tensor dcn2Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
         // AT_DISPATCH_FLOATING_TYPES(
         AT_DISPATCH_FLOATING_TYPES_AND_HALF(
             input.type(), "ms_deform_attn_forward_cuda", ([&] {
-                dcn2Dv3_im2col_cuda(
+                dcn3Dv3_im2col_cuda(
                     at::cuda::getCurrentCUDAStream(),
                     input.data<scalar_t>() + n * im2col_step_ * per_input_size,
                     offset.data<scalar_t>() +
@@ -85,7 +85,7 @@ at::Tensor dcn2Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
 }
 
 std::vector<at::Tensor>
-dcn2Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
+dcn3Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
                     const at::Tensor &mask, const int kernel_h,
                     const int kernel_w, const int stride_h, const int stride_w,
                     const int pad_h, const int pad_w, const int dilation_h,
@@ -146,7 +146,7 @@ dcn2Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
         // AT_DISPATCH_FLOATING_TYPES(
         AT_DISPATCH_FLOATING_TYPES_AND_HALF(
             input.type(), "ms_deform_attn_backward_cuda", ([&] {
-                dcn2Dv3_col2im_cuda(
+                dcn3Dv3_col2im_cuda(
                     at::cuda::getCurrentCUDAStream(),
                     grad_output_g.data<scalar_t>(),
                     input.data<scalar_t>() + n * im2col_step_ * per_input_size,

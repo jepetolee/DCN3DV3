@@ -31,7 +31,7 @@ inline int GET_BLOCKS(const int N, const int num_threads) {
 
 
 template <typename scalar_t>
-__device__ opmath_t dcn2Dv3_im2col_bilinear(const scalar_t *&bottom_data,
+__device__ opmath_t dcn3Dv3_im2col_trilinear(const scalar_t *&bottom_data,
                                           const int &height, const int &width,
                                           const int &group,
                                           const int &group_channels,
@@ -81,7 +81,7 @@ __device__ opmath_t dcn2Dv3_im2col_bilinear(const scalar_t *&bottom_data,
 }
 
 template <typename scalar_t>
-__device__ void dcn2Dv3_col2im_bilinear(
+__device__ void dcn3Dv3_col2im_trilinear(
     const scalar_t *&bottom_data, const int &height, const int &width,
     const int &nheads, const int &group_channels, const opmath_t &h,
     const opmath_t &w, const int &m, const int &c, const opmath_t offset_scale,
@@ -148,7 +148,7 @@ __device__ void dcn2Dv3_col2im_bilinear(
 }
 
 template <typename scalar_t>
-__device__ void dcn2Dv3_col2im_bilinear_gm(
+__device__ void dcn3Dv3_col2im_trilinear_gm(
     const scalar_t *&bottom_data, const int &height, const int &width,
     const int &nheads, const int &group_channels, const opmath_t &h,
     const opmath_t &w, const int &m, const int &c, const opmath_t offset_scale,
@@ -215,7 +215,7 @@ __device__ void dcn2Dv3_col2im_bilinear_gm(
 }
 
 template <typename scalar_t>
-__global__ void dcn2Dv3_im2col_gpu_kernel(
+__global__ void dcn3Dv3_im2col_gpu_kernel(
     const int num_kernels, const scalar_t *data_im, const scalar_t *data_offset,
     const scalar_t *data_mask, scalar_t *data_col, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -262,7 +262,7 @@ __global__ void dcn2Dv3_im2col_gpu_kernel(
                 const opmath_t weight = data_mask[data_weight_ptr];
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    col += dcn2Dv3_im2col_bilinear(
+                    col += dcn3Dv3_im2col_trilinear(
                                data_im_ptr, height_in, width_in, group,
                                group_channels, loc_h, loc_w, g_col, c_col) *
                            weight;
@@ -277,7 +277,7 @@ __global__ void dcn2Dv3_im2col_gpu_kernel(
 
 // debug
 template <typename scalar_t, unsigned int blockSize>
-__global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1(
+__global__ void dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -334,7 +334,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcn2Dv3_col2im_bilinear(
+                    dcn3Dv3_col2im_trilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,
@@ -371,7 +371,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1(
 }
 
 template <typename scalar_t, unsigned int blockSize>
-__global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2(
+__global__ void dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -428,7 +428,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcnv3_col2im_bilinear(
+                    dcn3Dv3_col2im_trilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,
@@ -467,7 +467,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2(
 }
 
 template <typename scalar_t>
-__global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v1(
+__global__ void dcn3Dv3_col2im_gpu_kernel_shm_reduce_v1(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -525,7 +525,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v1(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcn2Dv3_col2im_bilinear(
+                    dcn3Dv3_col2im_trilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,
@@ -562,7 +562,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v1(
 }
 
 template <typename scalar_t>
-__global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2(
+__global__ void dcn3Dv3_col2im_gpu_kernel_shm_reduce_v2(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -620,7 +620,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcn2Dv3_col2im_bilinear(
+                    dcn3Dv3_col2im_trilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,
@@ -668,7 +668,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2(
 }
 
 template <typename scalar_t>
-__global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2_multi_blocks(
+__global__ void dcn3Dv3_col2im_gpu_kernel_shm_reduce_v2_multi_blocks(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -726,7 +726,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2_multi_blocks(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcn2Dv3_col2im_bilinear(
+                    dcn3Dv3_col2im_trilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,
@@ -774,7 +774,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2_multi_blocks(
 }
 
 template <typename scalar_t>
-__global__ void dcn2Dv3_col2im_gpu_kernel_gm(
+__global__ void dcn3Dv3_col2im_gpu_kernel_gm(
     const int num_kernels, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -825,7 +825,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_gm(
                 const opmath_t weight = data_mask[data_weight_ptr];
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcn2Dv3_col2im_bilinear_gm(
+                    dcn3Dv3_col2im_trilinear_gm(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr, grad_offset, grad_mask);
@@ -840,7 +840,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_gm(
 }
 
 template <typename scalar_t>
-void dcn2Dv3_im2col_cuda(cudaStream_t stream, const scalar_t *data_im,
+void dcn3Dv3_im2col_cuda(cudaStream_t stream, const scalar_t *data_im,
                        const scalar_t *data_offset, const scalar_t *data_mask,
                        scalar_t *data_col, const int kernel_h,
                        const int kernel_w, const int stride_h,
@@ -869,7 +869,7 @@ void dcn2Dv3_im2col_cuda(cudaStream_t stream, const scalar_t *data_im,
 }
 
 template <typename scalar_t>
-void dcn2Dv3_col2im_cuda(
+void dcn3Dv3_col2im_cuda(
     cudaStream_t stream, const scalar_t *grad_col, const scalar_t *data_im,
     const scalar_t *data_offset, const scalar_t *data_mask, const int kernel_h,
     const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
@@ -895,7 +895,7 @@ void dcn2Dv3_col2im_cuda(
                     width_in, height_out, width_out, offset_scale, grad_im,
                     grad_offset, grad_mask);
         } else {
-            dcn2Dv3_col2im_gpu_kernel_gm<scalar_t>
+            dcn3Dv3_col2im_gpu_kernel_gm<scalar_t>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -907,7 +907,7 @@ void dcn2Dv3_col2im_cuda(
     } else {
         switch (group_channels) {
         case 1:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 1>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 1>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -917,7 +917,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 2:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 2>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 2>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -927,7 +927,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 4:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 4>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 4>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -937,7 +937,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 8:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 8>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 8>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -947,7 +947,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 16:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 16>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 16>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -957,7 +957,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 32:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 32>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v1<scalar_t, 32>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -967,7 +967,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 64:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 64>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 64>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -977,7 +977,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 128:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 128>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 128>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -987,7 +987,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 256:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 256>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 256>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -997,7 +997,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 512:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 512>
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t, 512>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
                              data_mask, kernel_h, kernel_w, stride_h, stride_w,
@@ -1007,7 +1007,7 @@ void dcn2Dv3_col2im_cuda(
                              grad_mask);
             break;
         case 1024:
-            dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t,
+            dcn3Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2<scalar_t,
                                                                   1024>
                 <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads, 0,
                    stream>>>(num_kernels, grad_col, data_im, data_offset,
@@ -1019,7 +1019,7 @@ void dcn2Dv3_col2im_cuda(
             break;
         default:
             if (group_channels < 64) {
-                dcn2Dv3_col2im_gpu_kernel_shm_reduce_v1<scalar_t>
+                dcn3Dv3_col2im_gpu_kernel_shm_reduce_v1<scalar_t>
                     <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads,
                        num_threads * 3 * sizeof(opmath_t), stream>>>(
                         num_kernels, grad_col, data_im, data_offset, data_mask,
@@ -1028,7 +1028,7 @@ void dcn2Dv3_col2im_cuda(
                         height_in, width_in, height_out, width_out,
                         offset_scale, grad_im, grad_offset, grad_mask);
             } else {
-                dcn2Dv3_col2im_gpu_kernel_shm_reduce_v2<scalar_t>
+                dcn3Dv3_col2im_gpu_kernel_shm_reduce_v2<scalar_t>
                     <<<GET_BLOCKS(num_actual_kernels, num_threads), num_threads,
                        num_threads * 3 * sizeof(opmath_t), stream>>>(
                         num_kernels, grad_col, data_im, data_offset, data_mask,

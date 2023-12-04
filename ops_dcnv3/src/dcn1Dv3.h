@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "cpu/dcn2Dv3_cpu.h"
+#include "cpu/dcn1Dv3_cpu.h"
 
 #ifdef WITH_CUDA
-#include "cuda/dcn2Dv3_cuda.h"
+#include "cuda/dcn1Dv3_cuda.h"
 #endif
 
-at::Tensor dcn2Dv3_forward(const at::Tensor &input, const at::Tensor &offset,
+at::Tensor dcn1Dv3_forward(const at::Tensor &input, const at::Tensor &offset,
                          const at::Tensor &mask, const int kernel_h,
                          const int kernel_w, const int stride_h,
                          const int stride_w, const int pad_h, const int pad_w,
@@ -26,7 +26,7 @@ at::Tensor dcn2Dv3_forward(const at::Tensor &input, const at::Tensor &offset,
                          const float offset_scale, const int im2col_step) {
     if (input.type().is_cuda()) {
 #ifdef WITH_CUDA
-        return dcn2Dv3_cuda_forward(input, offset, mask, kernel_h, kernel_w,
+        return dcn1Dv3_cuda_forward(input, offset, mask, kernel_h, kernel_w,
                                   stride_h, stride_w, pad_h, pad_w, dilation_h,
                                   dilation_w, group, group_channels,
                                   offset_scale, im2col_step);
@@ -38,7 +38,7 @@ at::Tensor dcn2Dv3_forward(const at::Tensor &input, const at::Tensor &offset,
 }
 
 std::vector<at::Tensor>
-dcn2Dv3_backward(const at::Tensor &input, const at::Tensor &offset,
+dcn1Dv3_backward(const at::Tensor &input, const at::Tensor &offset,
                const at::Tensor &mask, const int kernel_h, const int kernel_w,
                const int stride_h, const int stride_w, const int pad_h,
                const int pad_w, const int dilation_h, const int dilation_w,
@@ -47,7 +47,7 @@ dcn2Dv3_backward(const at::Tensor &input, const at::Tensor &offset,
                const int im2col_step) {
     if (input.type().is_cuda()) {
 #ifdef WITH_CUDA
-        return dcn2Dv3_cuda_backward(input, offset, mask, kernel_h, kernel_w,
+        return dcn1Dv3_cuda_backward(input, offset, mask, kernel_h, kernel_w,
                                    stride_h, stride_w, pad_h, pad_w, dilation_h,
                                    dilation_w, group, group_channels,
                                    offset_scale, grad_output, im2col_step);

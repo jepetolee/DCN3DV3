@@ -428,7 +428,7 @@ __global__ void dcn2Dv3_col2im_gpu_kernel_shm_blocksize_aware_reduce_v2(
                 *(cache_grad_mask + threadIdx.x) = 0;
                 if (loc_h > -1 && loc_w > -1 && loc_h < height_in &&
                     loc_w < width_in) {
-                    dcnv3_col2im_bilinear(
+                    dcn2Dv3_col2im_bilinear(
                         data_im_ptr, height_in, width_in, group, group_channels,
                         loc_h, loc_w, g_col, c_col, offset_scale, top_grad,
                         weight, grad_im_ptr,

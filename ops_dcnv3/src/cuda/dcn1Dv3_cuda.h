@@ -12,7 +12,7 @@
 #pragma once
 #include <torch/extension.h>
 
-at::Tensor dcn2Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offset,
+at::Tensor dcn1Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offset,
                               const at::Tensor &mask, const int kernel_h,
                               const int kernel_w, const int stride_h,
                               const int stride_w, const int pad_h,
@@ -22,7 +22,7 @@ at::Tensor dcn2Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
                               const float offset_scale, const int im2col_step);
 
 std::vector<at::Tensor>
-dcn2Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
+dcn1Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
                     const at::Tensor &mask, const int kernel_h,
                     const int kernel_w, const int stride_h, const int stride_w,
                     const int pad_h, const int pad_w, const int dilation_h,
