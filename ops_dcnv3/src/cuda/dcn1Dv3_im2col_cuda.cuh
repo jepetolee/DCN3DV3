@@ -32,20 +32,17 @@ inline int GET_BLOCKS(const int N, const int num_threads) {
 
 template <typename scalar_t>
 __device__ opmath_t dcn1Dv3_im2col_unilinear(const scalar_t *&bottom_data,
-                                          const int &height, const int &width,
+                                          const int &length,
                                           const int &group,
                                           const int &group_channels,
-                                          const opmath_t &h, const opmath_t &w,
+                                          const opmath_t &l,
                                           const int &g, const int &c) {
-    const int h_low = floor(h);
-    const int w_low = floor(w);
-    const int h_high = h_low + 1;
-    const int w_high = w_low + 1;
-
-    const opmath_t lh = h - h_low;
-    const opmath_t lw = w - w_low;
-    const opmath_t hh = 1 - lh, hw = 1 - lw;
-
+    const int l_low = floor(h);
+    const int l_high = l_low + 1;
+    
+    const opmath_t ll = l - l_low;
+    const opmath_t hh = 1 - ll;
+    // 여기까지 수정함
     const int w_stride = group * group_channels;
     const int h_stride = width * w_stride;
     const int h_low_ptr_offset = h_low * h_stride;
