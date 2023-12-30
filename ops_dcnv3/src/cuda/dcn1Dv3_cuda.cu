@@ -34,9 +34,7 @@ at::Tensor dcn1Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
     const int batch = input.size(0);
     const int length_in = input.size(1);
     const int channels = input.size(2);
-    const int length_out =
-        (height_in + 2 * pad_h - (dilation_l * (kernel_l - 1) + 1)) / stride_l +
-        1;
+    const int length_out = (length_in + 2 * pad_l - (dilation_l * (kernel_l - 1) + 1)) / stride_l + 1;
     const int im2col_step_ = std::min(batch, im2col_step);
 
     AT_ASSERTM(batch % im2col_step_ == 0,
@@ -54,6 +52,7 @@ at::Tensor dcn1Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
     auto per_input_size = length_in * group * group_channels;
     auto per_offset_size = length_out * group * kernel_l * 2;
     auto per_mask_size = length_out * group * kernel_l;
+
     for (int n = 0; n < batch / im2col_step_; ++n) {
         auto columns = output_n.select(0, n);
         // AT_DISPATCH_FLOATING_TYPES(
@@ -75,11 +74,11 @@ at::Tensor dcn1Dv3_cuda_forward(const at::Tensor &input, const at::Tensor &offse
 
 std::vector<at::Tensor>
 dcn1Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
-                    const at::Tensor &mask, const int kernel_l,
-                    const int kernel_l, const int stride_l,
-                    const int pad_l, const int dilation_l, const int group,
-                    const int group_channels, const float offset_scale,
-                    const at::Tensor &grad_output, const int im2col_step) {
+                      const at::Tensor &mask, const int kernel_l,
+                      const int kernel_l, const int stride_l,
+                      const int pad_l, const int dilation_l, const int group,
+                      const int group_channels, const float offset_scale,
+                      const at::Tensor &grad_output, const int im2col_step) {
 
     AT_ASSERTM(input.is_contiguous(), "input tensor has to be contiguous");
     AT_ASSERTM(offset.is_contiguous(), "offset tensor has to be contiguous");
@@ -95,18 +94,11 @@ dcn1Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
     const int batch = input.size(0);
     const int length_in = input.size(1);
     const int channels = input.size(2);
-    const int length_out =
-        (length_in + 2 * pad_l - (dilation_l * (kernel_l - 1) + 1)) / stride_l +
-        1;
-
+    const int length_out = (length_in + 2 * pad_l - (dilation_l * (kernel_l - 1) + 1)) / stride_l + 1;
     const int im2col_step_ = std::min(batch, im2col_step);
 
-    AT_ASSERTM(batch % im2col_step_ == 0,
-               "batch(%d) must divide im2col_step(%d)", batch, im2col_step_);
-    AT_ASSERTM(
-        channels == (group * group_channels),
-        "Input channels and group times group channels wont match: (%d vs %d).",
-        channels, group * group_channels);
+    AT_ASSERTM(batch % im2col_step_ == 0, "batch(%d) must divide im2col_step(%d)", batch, im2col_step_);
+    AT_ASSERTM(channels == (group * group_channels), "Input channels and group times group channels wont match: (%d vs %d).", channels, group * group_channels);
 
     auto dtype = input.dtype();
     if (dtype == at::kHalf) {
@@ -116,21 +108,17 @@ dcn1Dv3_cuda_backward(const at::Tensor &input, const at::Tensor &offset,
     auto grad_input = at::zeros_like(input, dtype);
     auto grad_offset = at::zeros_like(offset, dtype);
     auto grad_mask = at::zeros_like(mask, dtype);
-
     const int batch_n = im2col_step_;
-    auto per_input_size = height_in * width_in * group * group_channels;
-    auto per_offset_size =
-        height_out * width_out * group * kernel_h * kernel_w * 2;
-    auto per_mask_size = height_out * width_out * group * kernel_h * kernel_w;
-    auto grad_output_n =
-        grad_output.view({batch / im2col_step_, batch_n, height_out * width_out,
-                          group, group_channels});
+
+    auto per_input_size = length_in  * group * group_channels;
+    auto per_offset_size = length_out  * group * kernel_l * 2;
+    auto per_mask_size = length_out  * group * kernel_l;
+    auto grad_output_n = grad_output.view({batch / im2col_step_, batch_n, length_out, group, group_channels});
 
     for (int n = 0; n < batch / im2col_step_; ++n) {
         auto grad_output_g = grad_output_n.select(0, n);
         // AT_DISPATCH_FLOATING_TYPES(
-        AT_DISPATCH_FLOATING_TYPES_AND_HALF(
-            input.type(), "ms_deform_attn_backward_cuda", ([&] {
+        AT_DISPATCH_FLOATING_TYPES_AND_HALF( input.type(), "ms_deform_attn_backward_cuda", ([&] {
                 dcn1Dv3_col2im_cuda(
                     at::cuda::getCurrentCUDAStream(),
                     grad_output_g.data<scalar_t>(),

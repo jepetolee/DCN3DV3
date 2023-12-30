@@ -16,7 +16,7 @@ from torch.cuda.amp import custom_bwd, custom_fwd
 import DCNv3
 
 
-class DCNv3Function(Function):
+class DCN2Dv3Function(Function):
     @staticmethod
     @custom_fwd
     def forward(
@@ -36,7 +36,7 @@ class DCNv3Function(Function):
         ctx.group_channels = group_channels
         ctx.offset_scale = offset_scale
         ctx.im2col_step = im2col_step
-        output = DCNv3.dcnv3_forward(
+        output = DCNv3.dcn2Dv3_forward(
             input, offset, mask, kernel_h,
             kernel_w, stride_h, stride_w, pad_h,
             pad_w, dilation_h, dilation_w, group,
@@ -51,7 +51,7 @@ class DCNv3Function(Function):
     def backward(ctx, grad_output):
         input, offset, mask = ctx.saved_tensors
         grad_input, grad_offset, grad_mask = \
-            DCNv3.dcnv3_backward(
+            DCNv3.dcn2Dv3_backward(
                 input, offset, mask, ctx.kernel_h,
                 ctx.kernel_w, ctx.stride_h, ctx.stride_w, ctx.pad_h,
                 ctx.pad_w, ctx.dilation_h, ctx.dilation_w, ctx.group,
@@ -144,7 +144,7 @@ def _generate_dilation_grids(spatial_shapes, kernel_h, kernel_w, dilation_h, dil
     return grid
 
 
-def dcnv3_core_pytorch(
+def dcn2Dv3_core_pytorch(
         input, offset, mask, kernel_h,
         kernel_w, stride_h, stride_w, pad_h,
         pad_w, dilation_h, dilation_w, group,

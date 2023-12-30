@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\build",
+    "\\build\\lib.win-amd64-3.10",
+    "\\build\\lib.win-amd64-3.10\\functions",
+    "\\build\\lib.win-amd64-3.10\\modules",
+    "\\src",
+    "\\src\\cuda"
+  ],
+  "SelectedNode": "\\build\\lib.win-amd64-3.10\\modules\\dcnv3.py",
+  "PreviewInSolutionExplorer": false
+}

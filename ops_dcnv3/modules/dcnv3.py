@@ -13,7 +13,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.init import xavier_uniform_, constant_
-from ..functions import DCNv3Function, dcnv3_core_pytorch
+from ..functions import DCN2Dv3Function, dcn2Dv3_core_pytorch
 
 
 class to_channels_first(nn.Module):
@@ -88,7 +88,7 @@ class CenterFeatureScaleModule(nn.Module):
         return center_feature_scale
 
 
-class DCNv3_pytorch(nn.Module):
+class DCN2Dv3_pytorch(nn.Module):
     def __init__(
             self,
             channels=64,
@@ -195,7 +195,7 @@ class DCNv3_pytorch(nn.Module):
         mask = self.mask(x1).reshape(N, H, W, self.group, -1)
         mask = F.softmax(mask, -1).reshape(N, H, W, -1)
 
-        x = dcnv3_core_pytorch(
+        x = dcn2Dv3_core_pytorch(
             x, offset, mask,
             self.kernel_size, self.kernel_size,
             self.stride, self.stride,
@@ -215,7 +215,7 @@ class DCNv3_pytorch(nn.Module):
         return x
 
 
-class DCNv3(nn.Module):
+class DCN2Dv3(nn.Module):
     def __init__(
             self,
             channels=64,
@@ -323,7 +323,7 @@ class DCNv3(nn.Module):
         mask = self.mask(x1).reshape(N, H, W, self.group, -1)
         mask = F.softmax(mask, -1).reshape(N, H, W, -1).type(dtype)
 
-        x = DCNv3Function.apply(
+        x = DCN2Dv3Function.apply(
             x, offset, mask,
             self.kernel_size, self.kernel_size,
             self.stride, self.stride,

@@ -4,4 +4,4 @@
 # Licensed under The MIT License [see LICENSE for details]
 # --------------------------------------------------------
 
-from .dcnv3_func import DCNv3Function, dcnv3_core_pytorch
+from .dcnv3_func import DCN2Dv3Function, dcn2Dv3_core_pytorch
